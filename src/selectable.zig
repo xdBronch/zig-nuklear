@@ -6,7 +6,7 @@ const mem = std.mem;
 const testing = std.testing;
 
 pub fn label(ctx: *nk.Context, title: []const u8, flags: nk.Flags, value: *bool) bool {
-    var c_value: c.nk_bool = @boolToInt(value.*);
+    var c_value: c.nk_bool = @intFromBool(value.*);
     defer value.* = c_value != 0;
     return c.nk_selectable_label(ctx, nk.slice(title), flags, &c_value) != 0;
 }
@@ -18,7 +18,7 @@ pub fn imageLabel(
     flags: nk.Flags,
     value: *bool,
 ) bool {
-    var c_value: c.nk_bool = @boolToInt(value.*);
+    var c_value: c.nk_bool = @intFromBool(value.*);
     defer value.* = c_value != 0;
     return c.nk_selectable_image_label(ctx, img, nk.slice(title), flags, &c_value) != 0;
 }
@@ -30,7 +30,7 @@ pub fn symbolLabel(
     flags: nk.Flags,
     value: *bool,
 ) bool {
-    var c_value: c.nk_bool = @boolToInt(value.*);
+    var c_value: c.nk_bool = @intFromBool(value.*);
     defer value.* = c_value != 0;
     return c.nk_selectable_symbol_label(
         ctx,

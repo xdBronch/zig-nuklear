@@ -17,7 +17,7 @@ pub fn init(allocator: *const mem.Allocator, size: usize) Buffer {
 
 pub fn initFixed(bytes: []u8) Buffer {
     var res: Buffer = undefined;
-    c.nk_buffer_init_fixed(&res.c, @ptrCast(*anyopaque, bytes.ptr), bytes.len);
+    c.nk_buffer_init_fixed(&res.c, @as(*anyopaque, @ptrCast(bytes.ptr)), bytes.len);
     return res;
 }
 
@@ -36,7 +36,7 @@ pub fn push(
     return c.nk_buffer_push(
         &buffer.c,
         type_,
-        @ptrCast(*const anyopaque, bytes.ptr),
+        @as(*const anyopaque, @ptrCast(bytes.ptr)),
         bytes.len,
         @"align",
     );
@@ -61,7 +61,7 @@ pub fn free(buffer: *Buffer) void {
 pub fn memory(buffer: Buffer) []u8 {
     const total = c.nk_buffer_total(nk.discardConst(&buffer.c));
     const bytes = c.nk_buffer_memory(nk.discardConst(&buffer.c));
-    return @ptrCast([*]u8, bytes)[0..total];
+    return @as([*]u8, @ptrCast(bytes))[0..total];
 }
 
 test {

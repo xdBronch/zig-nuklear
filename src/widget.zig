@@ -42,20 +42,20 @@ pub fn isHovered(ctx: *nk.Context) bool {
 pub fn isMouseClicked(ctx: *nk.Context, bots: nk.input.Buttons) bool {
     return c.nk_widget_is_mouse_clicked(
         ctx,
-        @intToEnum(c.enum_nk_buttons, @enumToInt(bots)),
+        @as(c.enum_nk_buttons, @enumFromInt(@intFromEnum(bots))),
     ) != 0;
 }
 
 pub fn hasMouseClickDown(ctx: *nk.Context, bots: nk.input.Buttons, down: bool) bool {
     return c.nk_widget_has_mouse_click_down(
         ctx,
-        @intToEnum(c.enum_nk_buttons, @enumToInt(bots)),
-        @boolToInt(down),
+        @as(c.enum_nk_buttons, @enumFromInt(@intFromEnum(bots))),
+        @intFromBool(down),
     ) != 0;
 }
 
 pub fn spacing(ctx: *nk.Context, cols: usize) void {
-    return c.nk_spacing(ctx, @intCast(c_int, cols));
+    return c.nk_spacing(ctx, @as(c_int, @intCast(cols)));
 }
 
 test {

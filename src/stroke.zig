@@ -55,8 +55,8 @@ pub fn triangle(b: *nk.CommandBuffer, h: f32, o: f32, q: f32, d: f32, y: f32, a:
 pub fn polyline(b: *nk.CommandBuffer, points: [][2]f32, line_thickness: f32, col: nk.Color) void {
     return c.nk_stroke_polyline(
         b,
-        @ptrCast([*]f32, points.ptr),
-        @intCast(c_int, points.len),
+        @as([*]f32, @ptrCast(points.ptr)),
+        @as(c_int, @intCast(points.len)),
         line_thickness,
         col,
     );
@@ -65,8 +65,8 @@ pub fn polyline(b: *nk.CommandBuffer, points: [][2]f32, line_thickness: f32, col
 pub fn polygon(b: *nk.CommandBuffer, points: [][2]f32, line_thickness: f32, col: nk.Color) void {
     return c.nk_stroke_polygon(
         b,
-        @ptrCast([*]f32, points.ptr),
-        @intCast(c_int, points.len),
+        @as([*]f32, @ptrCast(points.ptr)),
+        @as(c_int, @intCast(points.len)),
         line_thickness,
         col,
     );

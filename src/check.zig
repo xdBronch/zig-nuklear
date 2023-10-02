@@ -6,15 +6,15 @@ const mem = std.mem;
 const testing = std.testing;
 
 pub fn label(ctx: *nk.Context, title: []const u8, active: bool) bool {
-    return c.nk_check_label(ctx, nk.slice(title), @boolToInt(active)) != 0;
+    return c.nk_check_label(ctx, nk.slice(title), @intFromBool(active)) != 0;
 }
 
 pub fn flagsLabel(ctx: *nk.Context, title: []const u8, flags: usize, value: usize) usize {
     return c.nk_check_flags_label(
         ctx,
         nk.slice(title),
-        @intCast(c_uint, flags),
-        @intCast(c_uint, value),
+        @as(c_uint, @intCast(flags)),
+        @as(c_uint, @intCast(value)),
     );
 }
 

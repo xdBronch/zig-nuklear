@@ -12,8 +12,8 @@ pub fn begin(
     row_count: usize,
     flags: nk.PanelFlags,
 ) ?View {
-    const h = @intCast(c_int, row_height);
-    const cnt = @intCast(c_int, row_count);
+    const h = @as(c_int, @intCast(row_height));
+    const cnt = @as(c_int, @intCast(row_count));
 
     var out: c.nk_list_view = undefined;
     if (c.nk_list_view_begin(
@@ -27,9 +27,9 @@ pub fn begin(
         return null;
 
     return View{
-        .begin = @intCast(usize, out.begin),
-        .end = @intCast(usize, out.end),
-        .count = @intCast(usize, out.count),
+        .begin = @as(usize, @intCast(out.begin)),
+        .end = @as(usize, @intCast(out.end)),
+        .count = @as(usize, @intCast(out.count)),
         ._ctx = out.ctx,
         ._total_height = out.total_height,
         ._scroll_ptr = out.scroll_pointer,
@@ -39,9 +39,9 @@ pub fn begin(
 
 pub fn end(view: View) void {
     var list = c.nk_list_view{
-        .begin = @intCast(c_int, view.begin),
-        .end = @intCast(c_int, view.end),
-        .count = @intCast(c_int, view.count),
+        .begin = @as(c_int, @intCast(view.begin)),
+        .end = @as(c_int, @intCast(view.end)),
+        .count = @as(c_int, @intCast(view.count)),
         .total_height = view._total_height,
         .ctx = view._ctx,
         .scroll_pointer = view._scroll_ptr,

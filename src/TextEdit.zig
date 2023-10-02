@@ -14,7 +14,7 @@ pub fn init(a: mem.Allocator, size: usize) TextEdit {
     c.nk_textedit_init(
         &res.c,
         &nk.allocator(a),
-        @intCast(c.nk_size, size),
+        @as(c.nk_size, @intCast(size)),
     );
     return res;
 }
@@ -23,8 +23,8 @@ pub fn initFixed(memory: []u8) TextEdit {
     var res: TextEdit = undefined;
     c.nk_textedit_init_fixed(
         &res.c,
-        @ptrCast(*anyopaque, memory.ptr),
-        @intCast(c.nk_size, memory.len),
+        @as(*anyopaque, @ptrCast(memory.ptr)),
+        @as(c.nk_size, @intCast(memory.len)),
     );
     return res;
 }
@@ -38,7 +38,7 @@ pub fn text(e: *TextEdit, t: []const u8) void {
 }
 
 pub fn delete(e: *TextEdit, where: usize, len: usize) void {
-    return c.nk_textedit_delete(&e.c, @intCast(c_int, where), @intCast(c_int, len));
+    return c.nk_textedit_delete(&e.c, @as(c_int, @intCast(where)), @as(c_int, @intCast(len)));
 }
 
 pub fn deleteSelection(e: *TextEdit) void {

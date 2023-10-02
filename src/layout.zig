@@ -26,15 +26,15 @@ pub fn ratioFromPixel(ctx: *nk.Context, pixel_width: f32) f32 {
 }
 
 pub fn rowDynamic(ctx: *nk.Context, height: f32, cols: usize) void {
-    c.nk_layout_row_dynamic(ctx, height, @intCast(c_int, cols));
+    c.nk_layout_row_dynamic(ctx, height, @as(c_int, @intCast(cols)));
 }
 
 pub fn rowStatic(ctx: *nk.Context, height: f32, item_width: usize, cols: usize) void {
-    c.nk_layout_row_static(ctx, height, @intCast(c_int, item_width), @intCast(c_int, cols));
+    c.nk_layout_row_static(ctx, height, @as(c_int, @intCast(item_width)), @as(c_int, @intCast(cols)));
 }
 
 pub fn rowBegin(ctx: *nk.Context, format: Format, row_height: f32, cols: usize) void {
-    c.nk_layout_row_begin(ctx, format, row_height, @intCast(c_int, cols));
+    c.nk_layout_row_begin(ctx, format, row_height, @as(c_int, @intCast(cols)));
 }
 
 pub fn rowPush(ctx: *nk.Context, value: f32) void {
@@ -46,7 +46,7 @@ pub fn rowEnd(ctx: *nk.Context) void {
 }
 
 pub fn row(ctx: *nk.Context, format: Format, height: f32, ratios: []const f32) void {
-    c.nk_layout_row(ctx, format, height, @intCast(c_int, ratios.len), ratios.ptr);
+    c.nk_layout_row(ctx, format, height, @as(c_int, @intCast(ratios.len)), ratios.ptr);
 }
 
 pub fn rowTemplateBegin(ctx: *nk.Context, row_height: f32) void {
@@ -70,7 +70,7 @@ pub fn rowTemplateEnd(ctx: *nk.Context) void {
 }
 
 pub fn spaceBegin(ctx: *nk.Context, format: Format, height: f32, widget_count: usize) void {
-    const count = @intCast(c_int, math.max(widget_count, math.maxInt(c_int)));
+    const count = @as(c_int, @intCast(math.max(widget_count, math.maxInt(c_int))));
     c.nk_layout_space_begin(ctx, format, height, count);
 }
 

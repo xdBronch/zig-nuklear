@@ -11,11 +11,11 @@ pub const Format = enum(u8) {
 };
 
 pub fn picker(ctx: *nk.Context, color: nk.Colorf, format: Format) nk.Colorf {
-    return c.nk_color_picker(ctx, color, @enumToInt(format));
+    return c.nk_color_picker(ctx, color, @intFromEnum(format));
 }
 
 pub fn pick(ctx: *nk.Context, color: *nk.Colorf, format: Format) bool {
-    return c.nk_color_pick(ctx, color, @enumToInt(format)) != 0;
+    return c.nk_color_pick(ctx, color, @intFromEnum(format)) != 0;
 }
 
 test {

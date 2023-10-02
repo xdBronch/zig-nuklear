@@ -21,18 +21,18 @@ pub const Flags = struct {
     goto_end_on_activate: bool = false,
 
     fn toNulkear(flags: Flags) nk.Flags {
-        return @intCast(nk.Flags, (c.NK_EDIT_READ_ONLY * @boolToInt(flags.read_only)) |
-            (c.NK_EDIT_AUTO_SELECT * @boolToInt(flags.auto_select)) |
-            (c.NK_EDIT_SIG_ENTER * @boolToInt(flags.sig_enter)) |
-            (c.NK_EDIT_ALLOW_TAB * @boolToInt(flags.allow_tab)) |
-            (c.NK_EDIT_NO_CURSOR * @boolToInt(flags.no_cursor)) |
-            (c.NK_EDIT_SELECTABLE * @boolToInt(flags.selectable)) |
-            (c.NK_EDIT_CLIPBOARD * @boolToInt(flags.clipboard)) |
-            (c.NK_EDIT_CTRL_ENTER_NEWLINE * @boolToInt(flags.ctrl_enter_newline)) |
-            (c.NK_EDIT_NO_HORIZONTAL_SCROLL * @boolToInt(flags.no_horizontal_scroll)) |
-            (c.NK_EDIT_ALWAYS_INSERT_MODE * @boolToInt(flags.always_insert_mode)) |
-            (c.NK_EDIT_MULTILINE * @boolToInt(flags.multiline)) |
-            (c.NK_EDIT_GOTO_END_ON_ACTIVATE * @boolToInt(flags.goto_end_on_activate)));
+        return @as(nk.Flags, @intCast((c.NK_EDIT_READ_ONLY * @intFromBool(flags.read_only)) |
+            (c.NK_EDIT_AUTO_SELECT * @intFromBool(flags.auto_select)) |
+            (c.NK_EDIT_SIG_ENTER * @intFromBool(flags.sig_enter)) |
+            (c.NK_EDIT_ALLOW_TAB * @intFromBool(flags.allow_tab)) |
+            (c.NK_EDIT_NO_CURSOR * @intFromBool(flags.no_cursor)) |
+            (c.NK_EDIT_SELECTABLE * @intFromBool(flags.selectable)) |
+            (c.NK_EDIT_CLIPBOARD * @intFromBool(flags.clipboard)) |
+            (c.NK_EDIT_CTRL_ENTER_NEWLINE * @intFromBool(flags.ctrl_enter_newline)) |
+            (c.NK_EDIT_NO_HORIZONTAL_SCROLL * @intFromBool(flags.no_horizontal_scroll)) |
+            (c.NK_EDIT_ALWAYS_INSERT_MODE * @intFromBool(flags.always_insert_mode)) |
+            (c.NK_EDIT_MULTILINE * @intFromBool(flags.multiline)) |
+            (c.NK_EDIT_GOTO_END_ON_ACTIVATE * @intFromBool(flags.goto_end_on_activate))));
     }
 
     pub const simple = Flags{ .always_insert_mode = true };
@@ -67,14 +67,14 @@ pub fn string(
     max: usize,
     opts: Options,
 ) nk.Flags {
-    var c_len = @intCast(c_int, buf.len);
-    defer buf.len = @intCast(usize, c_len);
+    var c_len = @as(c_int, @intCast(buf.len));
+    defer buf.len = @as(usize, @intCast(c_len));
     return c.nk_edit_string(
         ctx,
         opts.flags.toNulkear(),
         buf.ptr,
         &c_len,
-        @intCast(c_int, max),
+        @as(c_int, @intCast(max)),
         opts.filter,
     );
 }
@@ -89,7 +89,7 @@ pub fn stringZ(
         ctx,
         opts.flags.toNulkear(),
         buf,
-        @intCast(c_int, max),
+        @as(c_int, @intCast(max)),
         opts.filter,
     );
 }

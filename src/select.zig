@@ -6,7 +6,7 @@ const mem = std.mem;
 const testing = std.testing;
 
 pub fn label(ctx: *nk.Context, title: []const u8, flags: nk.Flags, value: bool) bool {
-    return c.nk_select_label(ctx, nk.slice(title), flags, @boolToInt(value)) != 0;
+    return c.nk_select_label(ctx, nk.slice(title), flags, @intFromBool(value)) != 0;
 }
 
 pub fn imageLabel(
@@ -16,7 +16,7 @@ pub fn imageLabel(
     flags: nk.Flags,
     value: bool,
 ) bool {
-    return c.nk_select_image_label(ctx, img, nk.slice(title), flags, @boolToInt(value)) != 0;
+    return c.nk_select_image_label(ctx, img, nk.slice(title), flags, @intFromBool(value)) != 0;
 }
 
 pub fn symbolLabel(
@@ -31,7 +31,7 @@ pub fn symbolLabel(
         symbol.toNuklear(),
         nk.slice(title),
         flags,
-        @boolToInt(value),
+        @intFromBool(value),
     ) != 0;
 }
 

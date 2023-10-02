@@ -16,27 +16,27 @@ pub const Event = enum(nk.Flags) {
 };
 
 pub fn begin(ctx: *nk.Context, _type: Type, num: usize, min: f32, max: f32) bool {
-    return c.nk_chart_begin(ctx, @enumToInt(_type), @intCast(c_int, num), min, max) != 0;
+    return c.nk_chart_begin(ctx, @intFromEnum(_type), @as(c_int, @intCast(num)), min, max) != 0;
 }
 
 pub fn beginColored(ctx: *nk.Context, _type: Type, a: nk.Color, active: nk.Color, num: usize, min: f32, max: f32) bool {
-    return c.nk_chart_begin_colored(ctx, @enumToInt(_type), a, active, @intCast(c_int, num), min, max) != 0;
+    return c.nk_chart_begin_colored(ctx, @intFromEnum(_type), a, active, @as(c_int, @intCast(num)), min, max) != 0;
 }
 
 pub fn addSlot(ctx: *nk.Context, _type: Type, count: usize, min_value: f32, max_value: f32) void {
-    return c.nk_chart_add_slot(ctx, @enumToInt(_type), @intCast(c_int, count), min_value, max_value);
+    return c.nk_chart_add_slot(ctx, @intFromEnum(_type), @as(c_int, @intCast(count)), min_value, max_value);
 }
 
 pub fn addSlotColored(ctx: *nk.Context, _type: Type, a: nk.Color, active: nk.Color, count: usize, min_value: f32, max_value: f32) void {
-    return c.nk_chart_add_slot_colored(ctx, @enumToInt(_type), a, active, @intCast(c_int, count), min_value, max_value);
+    return c.nk_chart_add_slot_colored(ctx, @intFromEnum(_type), a, active, @as(c_int, @intCast(count)), min_value, max_value);
 }
 
 pub fn push(ctx: *nk.Context, value: f32) Event {
-    return @intToEnum(Event, c.nk_chart_push(ctx, value));
+    return @as(Event, @enumFromInt(c.nk_chart_push(ctx, value)));
 }
 
 pub fn pushSlot(ctx: *nk.Context, value: f32, slot: usize) Event {
-    return @intToEnum(Event, c.nk_chart_push_slot(ctx, value, @intCast(c_int, slot)));
+    return @as(Event, @enumFromInt(c.nk_chart_push_slot(ctx, value, @as(c_int, @intCast(slot)))));
 }
 
 pub fn end(ctx: *nk.Context) void {
@@ -46,9 +46,9 @@ pub fn end(ctx: *nk.Context) void {
 pub fn plot(ctx: *nk.Context, _type: Type, values: []const f32) void {
     return c.nk_plot(
         ctx,
-        @enumToInt(_type),
+        @intFromEnum(_type),
         values.ptr,
-        @intCast(c_int, values.len),
+        @as(c_int, @intCast(values.len)),
         0,
     );
 }
@@ -64,22 +64,22 @@ pub fn function(
     const T = @TypeOf(userdata);
     const Wrapped = struct {
         userdata: T,
-        getter: fn (T, usize) f32,
+        getter: *const fn (T, usize) f32,
 
         fn valueGetter(user: ?*anyopaque, index: c_int) callconv(.C) f32 {
-            const casted = @ptrCast(*const @This(), @alignCast(@alignOf(@This()), user));
-            return casted.getter(casted.userdata, @intCast(usize, index));
+            const casted = @as(*const @This(), @ptrCast(@alignCast(user)));
+            return casted.getter(casted.userdata, @as(usize, @intCast(index)));
         }
     };
 
     var wrapped = Wrapped{ .userdata = userdata, .getter = getter };
     return c.nk_plot_function(
         ctx,
-        @enumToInt(_type),
-        @ptrCast(*anyopaque, &wrapped),
+        @intFromEnum(_type),
+        @as(*anyopaque, @ptrCast(&wrapped)),
         Wrapped.valueGetter,
-        @intCast(c_int, count),
-        @intCast(c_int, offset),
+        @as(c_int, @intCast(count)),
+        @as(c_int, @intCast(offset)),
     );
 }
 
@@ -95,7 +95,7 @@ test "chart" {
         nk.layout.rowDynamic(ctx, 0.0, 1);
         nk.chart.function(ctx, .lines, 10, 0, {}, struct {
             fn func(_: void, i: usize) f32 {
-                return @intToFloat(f32, i);
+                return @as(f32, @floatFromInt(i));
             }
         }.func);
     }

@@ -40,12 +40,12 @@ pub fn showcase(ctx: *nk.Context) void {
             defer nk.group.end(ctx);
 
             nk.layout.rowDynamic(ctx, 0, 1);
-            Static.progress = @intCast(u8, nk.bar.prog(
+            Static.progress = @as(u8, @intCast(nk.bar.prog(
                 ctx,
                 Static.progress,
                 math.maxInt(u8),
                 true,
-            ));
+            )));
             Static.progress +%= 1;
         }
 
@@ -129,7 +129,7 @@ pub fn showcase(ctx: *nk.Context) void {
 
                 var i: u8 = 0;
                 while (i < points) : (i += 1) {
-                    if (nk.chart.push(ctx, @intToFloat(f32, i)) == .clicked)
+                    if (nk.chart.push(ctx, @as(f32, @floatFromInt(i))) == .clicked)
                         std.log.info("nk.chart.begin: {}", .{i});
                 }
             }
@@ -137,7 +137,7 @@ pub fn showcase(ctx: *nk.Context) void {
             nk.chart.plot(ctx, .column, &[_]f32{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 });
             nk.chart.function(ctx, .lines, 100, 0, {}, struct {
                 fn func(_: void, index: usize) f32 {
-                    return math.sqrt(@intToFloat(f32, index));
+                    return math.sqrt(@as(f32, @floatFromInt(index)));
                 }
             }.func);
         }

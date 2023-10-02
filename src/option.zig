@@ -6,7 +6,7 @@ const mem = std.mem;
 const testing = std.testing;
 
 pub fn label(ctx: *nk.Context, title: []const u8, active: bool) bool {
-    return c.nk_option_label(ctx, nk.slice(title), @boolToInt(active)) != 0;
+    return c.nk_option_label(ctx, nk.slice(title), @intFromBool(active)) != 0;
 }
 
 test {

@@ -11,14 +11,14 @@ pub fn items(
     selected: usize,
     strings: []const nk.Slice,
 ) usize {
-    return @intCast(usize, c.nk_combo(
+    return @as(usize, @intCast(c.nk_combo(
         ctx,
         nk.discardConst(strings.ptr),
-        @intCast(c_int, strings.len),
-        @intCast(c_int, selected),
-        @intCast(c_int, item_height),
+        @as(c_int, @intCast(strings.len)),
+        @as(c_int, @intCast(selected)),
+        @as(c_int, @intCast(item_height)),
         size,
-    ));
+    )));
 }
 
 pub fn separator(
@@ -30,15 +30,15 @@ pub fn separator(
     seb: u8,
     items_separated_by_separator: []const u8,
 ) usize {
-    return @intCast(usize, c.nk_combo_separator(
+    return @as(usize, @intCast(c.nk_combo_separator(
         ctx,
         nk.slice(items_separated_by_separator),
-        @intCast(c_int, seb),
-        @intCast(c_int, selected),
-        @intCast(c_int, count),
-        @intCast(c_int, item_height),
+        @as(c_int, @intCast(seb)),
+        @as(c_int, @intCast(selected)),
+        @as(c_int, @intCast(count)),
+        @as(c_int, @intCast(item_height)),
         size,
-    ));
+    )));
 }
 
 pub fn string(
@@ -49,14 +49,14 @@ pub fn string(
     count: usize,
     items_separated_by_zeros: []const u8,
 ) usize {
-    return @intCast(usize, c.nk_combo_string(
+    return @as(usize, @intCast(c.nk_combo_string(
         ctx,
         nk.slice(items_separated_by_zeros),
-        @intCast(c_int, selected),
-        @intCast(c_int, count),
-        @intCast(c_int, item_height),
+        @as(c_int, @intCast(selected)),
+        @as(c_int, @intCast(count)),
+        @as(c_int, @intCast(item_height)),
         size,
-    ));
+    )));
 }
 
 pub fn callback(
@@ -71,24 +71,24 @@ pub fn callback(
     const T = @TypeOf(userdata);
     const Wrapped = struct {
         userdata: T,
-        getter: fn (T, usize) []const u8,
+        getter: *const fn (T, usize) []const u8,
 
         fn valueGetter(user: ?*anyopaque, index: c_int, out: [*c]nk.Slice) callconv(.C) void {
-            const casted = @ptrCast(*const @This(), @alignCast(@alignOf(@This()), user));
-            out.* = nk.slice(casted.getter(casted.userdata, @intCast(usize, index)));
+            const casted = @as(*const @This(), @ptrCast(@alignCast(user)));
+            out.* = nk.slice(casted.getter(casted.userdata, @as(usize, @intCast(index))));
         }
     };
 
     var wrapped = Wrapped{ .userdata = userdata, .getter = getter };
-    return @intCast(usize, c.nk_combo_callback(
+    return @as(usize, @intCast(c.nk_combo_callback(
         ctx,
         Wrapped.valueGetter,
-        @ptrCast(*anyopaque, &wrapped),
-        @intCast(c_int, selected),
-        @intCast(c_int, count),
-        @intCast(c_int, item_height),
+        @as(*anyopaque, @ptrCast(&wrapped)),
+        @as(c_int, @intCast(selected)),
+        @as(c_int, @intCast(count)),
+        @as(c_int, @intCast(item_height)),
         size,
-    ));
+    )));
 }
 
 pub fn beginLabel(ctx: *nk.Context, size: nk.Vec2, selected: []const u8) bool {

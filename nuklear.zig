@@ -358,23 +358,23 @@ pub const Command = union(enum) {
 
     pub fn fromNuklear(cmd: *const c.struct_nk_command) Command {
         switch (cmd.type) {
-            .NK_COMMAND_SCISSOR => return .{ .scissor = @ptrCast(*const c.struct_nk_command_scissor, cmd) },
-            .NK_COMMAND_LINE => return .{ .line = @ptrCast(*const c.struct_nk_command_line, cmd) },
-            .NK_COMMAND_CURVE => return .{ .curve = @ptrCast(*const c.struct_nk_command_curve, cmd) },
-            .NK_COMMAND_RECT => return .{ .rect = @ptrCast(*const c.struct_nk_command_rect, cmd) },
-            .NK_COMMAND_RECT_FILLED => return .{ .rect_filled = @ptrCast(*const c.struct_nk_command_rect_filled, cmd) },
-            .NK_COMMAND_RECT_MULTI_COLOR => return .{ .rect_multi_color = @ptrCast(*const c.struct_nk_command_rect_multi_color, cmd) },
-            .NK_COMMAND_CIRCLE => return .{ .circle = @ptrCast(*const c.struct_nk_command_circle, cmd) },
-            .NK_COMMAND_CIRCLE_FILLED => return .{ .circle_filled = @ptrCast(*const c.struct_nk_command_circle_filled, cmd) },
-            .NK_COMMAND_ARC => return .{ .arc = @ptrCast(*const c.struct_nk_command_arc, cmd) },
-            .NK_COMMAND_ARC_FILLED => return .{ .arc_filled = @ptrCast(*const c.struct_nk_command_arc_filled, cmd) },
-            .NK_COMMAND_TRIANGLE => return .{ .triangle = @ptrCast(*const c.struct_nk_command_triangle, cmd) },
-            .NK_COMMAND_TRIANGLE_FILLED => return .{ .triangle_filled = @ptrCast(*const c.struct_nk_command_triangle_filled, cmd) },
-            .NK_COMMAND_POLYGON => return .{ .polygon = @ptrCast(*const c.struct_nk_command_polygon, cmd) },
-            .NK_COMMAND_POLYGON_FILLED => return .{ .polygon_filled = @ptrCast(*const c.struct_nk_command_polygon_filled, cmd) },
-            .NK_COMMAND_POLYLINE => return .{ .polyline = @ptrCast(*const c.struct_nk_command_polyline, cmd) },
-            .NK_COMMAND_TEXT => return .{ .text = @ptrCast(*const c.struct_nk_command_text, cmd) },
-            .NK_COMMAND_IMAGE => return .{ .image = @ptrCast(*const c.struct_nk_command_image, cmd) },
+            .NK_COMMAND_SCISSOR => return .{ .scissor = @as(*const c.struct_nk_command_scissor, @ptrCast(cmd)) },
+            .NK_COMMAND_LINE => return .{ .line = @as(*const c.struct_nk_command_line, @ptrCast(cmd)) },
+            .NK_COMMAND_CURVE => return .{ .curve = @as(*const c.struct_nk_command_curve, @ptrCast(cmd)) },
+            .NK_COMMAND_RECT => return .{ .rect = @as(*const c.struct_nk_command_rect, @ptrCast(cmd)) },
+            .NK_COMMAND_RECT_FILLED => return .{ .rect_filled = @as(*const c.struct_nk_command_rect_filled, @ptrCast(cmd)) },
+            .NK_COMMAND_RECT_MULTI_COLOR => return .{ .rect_multi_color = @as(*const c.struct_nk_command_rect_multi_color, @ptrCast(cmd)) },
+            .NK_COMMAND_CIRCLE => return .{ .circle = @as(*const c.struct_nk_command_circle, @ptrCast(cmd)) },
+            .NK_COMMAND_CIRCLE_FILLED => return .{ .circle_filled = @as(*const c.struct_nk_command_circle_filled, @ptrCast(cmd)) },
+            .NK_COMMAND_ARC => return .{ .arc = @as(*const c.struct_nk_command_arc, @ptrCast(cmd)) },
+            .NK_COMMAND_ARC_FILLED => return .{ .arc_filled = @as(*const c.struct_nk_command_arc_filled, @ptrCast(cmd)) },
+            .NK_COMMAND_TRIANGLE => return .{ .triangle = @as(*const c.struct_nk_command_triangle, @ptrCast(cmd)) },
+            .NK_COMMAND_TRIANGLE_FILLED => return .{ .triangle_filled = @as(*const c.struct_nk_command_triangle_filled, @ptrCast(cmd)) },
+            .NK_COMMAND_POLYGON => return .{ .polygon = @as(*const c.struct_nk_command_polygon, @ptrCast(cmd)) },
+            .NK_COMMAND_POLYGON_FILLED => return .{ .polygon_filled = @as(*const c.struct_nk_command_polygon_filled, @ptrCast(cmd)) },
+            .NK_COMMAND_POLYLINE => return .{ .polyline = @as(*const c.struct_nk_command_polyline, @ptrCast(cmd)) },
+            .NK_COMMAND_TEXT => return .{ .text = @as(*const c.struct_nk_command_text, @ptrCast(cmd)) },
+            .NK_COMMAND_IMAGE => return .{ .image = @as(*const c.struct_nk_command_image, @ptrCast(cmd)) },
             .NK_COMMAND_CUSTOM => return .{ .custom = cmd },
             .NK_COMMAND_NOP => unreachable,
             else => unreachable,
@@ -395,7 +395,7 @@ pub const PanelFlags = struct {
     input: bool = true,
 
     pub fn toNuklear(flags: PanelFlags) nk.Flags {
-        return @intCast(nk.Flags, (if (flags.title) |_| c.NK_WINDOW_TITLE else 0) |
+        return @as(nk.Flags, @intCast((if (flags.title) |_| c.NK_WINDOW_TITLE else 0) |
             (if (flags.border) c.NK_WINDOW_BORDER else 0) |
             (if (flags.moveable) c.NK_WINDOW_MOVABLE else 0) |
             (if (flags.scalable) c.NK_WINDOW_SCALABLE else 0) |
@@ -404,7 +404,7 @@ pub const PanelFlags = struct {
             (if (!flags.scrollbar) c.NK_WINDOW_NO_SCROLLBAR else 0) |
             (if (flags.scroll_auto_hide) c.NK_WINDOW_SCROLL_AUTO_HIDE else 0) |
             (if (flags.background) c.NK_WINDOW_BACKGROUND else 0) |
-            (if (!flags.input) c.NK_WINDOW_NO_INPUT else 0));
+            (if (!flags.input) c.NK_WINDOW_NO_INPUT else 0)));
     }
 };
 
@@ -431,7 +431,7 @@ pub const ScrollOffset = struct {
 
 pub fn init(alloc: *const mem.Allocator, font: ?*const UserFont) Context {
     var res: Context = undefined;
-    const status = c.nk_init(&res, &allocator(alloc), font);
+    const status = c.nk_init(&res, @constCast(&allocator(alloc)), font);
 
     // init only returns `0` if we pass `null` as the allocator.
     debug.assert(status != 0);
@@ -524,7 +524,7 @@ pub fn hsvaf(h: f32, s: f32, v: f32, a: f32) nk.Color {
 }
 
 pub fn colorToU32(y: nk.Color) u32 {
-    return @intCast(u32, c.nk_color_u32(y));
+    return @as(u32, @intCast(c.nk_color_u32(y)));
 }
 
 pub fn typeId(comptime T: type) usize {
@@ -535,16 +535,16 @@ pub fn typeId(comptime T: type) usize {
     const Id = struct {
         var addr: u8 = 0;
     };
-    return @ptrToInt(&Id.addr);
+    return @intFromPtr(&Id.addr);
 }
 
 pub fn id(comptime T: type) [@sizeOf(usize)]u8 {
-    return @bitCast([@sizeOf(usize)]u8, typeId(T));
+    return @as([@sizeOf(usize)]u8, @bitCast(typeId(T)));
 }
 
 pub fn allocator(alloc: *const mem.Allocator) Allocator {
     return .{
-        .userdata = .{ .ptr = discardConst(@ptrCast(*const anyopaque, alloc)) },
+        .userdata = .{ .ptr = discardConst(@as(*const anyopaque, @ptrCast(alloc))) },
         .alloc = heap.alloc,
         .free = heap.free,
     };
@@ -563,7 +563,7 @@ pub fn discardConst(ptr: anytype) DiscardConst(@TypeOf(ptr)) {
             const res = discardConst(ptr.ptr);
             return res[0..ptr.len];
         },
-        else => return @intToPtr(Res, @ptrToInt(ptr)),
+        else => return @as(Res, @ptrFromInt(@intFromPtr(ptr))),
     }
 }
 
@@ -581,31 +581,29 @@ const heap = struct {
     fn alloc(handle: Handle, m_old: ?*anyopaque, n: c.nk_size) callconv(.C) ?*anyopaque {
         const al = alignPtrCast(*const mem.Allocator, handle.ptr);
 
-        const res = if (@ptrCast(?[*]u8, m_old)) |old| blk: {
+        const res = if (@as(?[*]u8, @ptrCast(m_old))) |old| blk: {
             const old_with_header = old - header_size;
             const header = alignPtrCast([*]Header, old_with_header)[0];
 
             const old_mem = old_with_header[0 .. header_size + header.size];
-            if (al.resize(old_mem, n + header_size)) |resized| {
-                break :blk resized;
-            } else {}
+            if (al.resize(old_mem, n + header_size)) {
+                break :blk old_mem;
+            }
 
             // Resize failed. Give the caller new memory instead
-            break :blk al.allocAdvanced(u8, header_align, n + header_size, .exact) catch
-                return null;
+            break :blk al.alignedAlloc(u8, null, n + header_size) catch return null;
         } else blk: {
-            break :blk al.allocAdvanced(u8, header_align, n + header_size, .exact) catch
-                return null;
+            break :blk al.alignedAlloc(u8, null, n + header_size) catch return null;
         };
 
         // Store the size of the allocation in the extra memory we allocated, and return
         // a pointer after the header.
         alignPtrCast([*]Header, res.ptr)[0] = .{ .size = n };
-        return @ptrCast(*anyopaque, res[header_size..].ptr);
+        return @as(*anyopaque, @ptrCast(res[header_size..].ptr));
     }
 
     fn free(handle: Handle, m_old: ?*anyopaque) callconv(.C) void {
-        const old = @ptrCast(?[*]u8, m_old) orelse return;
+        const old = @as(?[*]u8, @ptrCast(m_old)) orelse return;
         const old_with_header = old - header_size;
         const header = alignPtrCast([*]Header, old_with_header)[0];
 
@@ -614,7 +612,7 @@ const heap = struct {
     }
 
     fn alignPtrCast(comptime Ptr: type, ptr: anytype) Ptr {
-        return @ptrCast(Ptr, @alignCast(@typeInfo(Ptr).Pointer.alignment, ptr));
+        return @ptrCast(@alignCast(ptr));
     }
 };
 

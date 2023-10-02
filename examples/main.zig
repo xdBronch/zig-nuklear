@@ -11,7 +11,9 @@ const mem = std.mem;
 const unicode = std.unicode;
 
 pub fn main() !void {
-    const allocator = heap.c_allocator;
+    var gpa_state = std.heap.GeneralPurposeAllocator(.{}){};
+    defer _ = gpa_state.deinit();
+    const allocator = gpa_state.allocator();
 
     if (c.glfwInit() == 0)
         return error.InitFailed;
@@ -36,7 +38,7 @@ pub fn main() !void {
     var _null: nk.DrawNullTexture = undefined;
     nk.atlas.end(
         &atlas,
-        nk.rest.nkHandleId(@intCast(c_int, font_tex)),
+        nk.rest.nkHandleId(@as(c_int, @intCast(font_tex))),
         &_null,
     );
 
@@ -62,7 +64,7 @@ pub fn main() !void {
         program.ebuf.free();
     }
 
-    c.glfwSetWindowUserPointer(win, @ptrCast(*anyopaque, &program));
+    c.glfwSetWindowUserPointer(win, @as(*anyopaque, @ptrCast(&program)));
 
     while (c.glfwWindowShouldClose(program.win) == 0) {
         program.input();
@@ -134,8 +136,8 @@ fn input(program: *Program) void {
     var fy: f64 = undefined;
     c.glfwGetCursorPos(win, &fx, &fy);
 
-    const x = @floatToInt(c_int, fx);
-    const y = @floatToInt(c_int, fy);
+    const x = @as(c_int, @intFromFloat(fx));
+    const y = @as(c_int, @intFromFloat(fy));
     nk.input.motion(ctx, x, y);
 
     if (ctx.input.mouse.grabbed != 0) {
@@ -170,8 +172,8 @@ fn render(program: *Program) void {
     c.glfwGetWindowSize(win, &width, &height);
     c.glfwGetFramebufferSize(win, &display_width, &display_height);
 
-    const fb_scale_x = @intToFloat(f32, display_width) / @intToFloat(f32, width);
-    const fb_scale_y = @intToFloat(f32, display_height) / @intToFloat(f32, height);
+    const fb_scale_x = @as(f32, @floatFromInt(display_width)) / @as(f32, @floatFromInt(width));
+    const fb_scale_y = @as(f32, @floatFromInt(display_height)) / @as(f32, @floatFromInt(height));
 
     c.glViewport(0, 0, width, height);
     c.glClear(c.GL_COLOR_BUFFER_BIT);
@@ -189,7 +191,7 @@ fn render(program: *Program) void {
     c.glMatrixMode(c.GL_PROJECTION);
     c.glPushMatrix();
     c.glLoadIdentity();
-    c.glOrtho(0.0, @intToFloat(f64, width), @intToFloat(f64, height), 0.0, -1.0, 1.0);
+    c.glOrtho(0.0, @as(f64, @floatFromInt(width)), @as(f64, @floatFromInt(height)), 0.0, -1.0, 1.0);
     c.glMatrixMode(c.GL_MODELVIEW);
     c.glPushMatrix();
     c.glLoadIdentity();
@@ -227,30 +229,30 @@ fn render(program: *Program) void {
         });
 
         const vertices = vbuf.memory();
-        c.glVertexPointer(2, c.GL_FLOAT, vs, @ptrCast(*const anyopaque, @ptrCast([*]const u8, vertices) + vp));
-        c.glTexCoordPointer(2, c.GL_FLOAT, vs, @ptrCast(*const anyopaque, @ptrCast([*]const u8, vertices) + vt));
-        c.glColorPointer(4, c.GL_UNSIGNED_BYTE, vs, @ptrCast(*const anyopaque, @ptrCast([*]const u8, vertices) + vc));
+        c.glVertexPointer(2, c.GL_FLOAT, vs, @as(*const anyopaque, @ptrCast(@as([*]const u8, @ptrCast(vertices)) + vp)));
+        c.glTexCoordPointer(2, c.GL_FLOAT, vs, @as(*const anyopaque, @ptrCast(@as([*]const u8, @ptrCast(vertices)) + vt)));
+        c.glColorPointer(4, c.GL_UNSIGNED_BYTE, vs, @as(*const anyopaque, @ptrCast(@as([*]const u8, @ptrCast(vertices)) + vc)));
 
-        var offset = @ptrCast(
+        var offset = @as(
             [*]const nk.DrawIndex,
-            @alignCast(@alignOf(nk.DrawIndex), ebuf.memory()),
+            @ptrCast(@alignCast(ebuf.memory())),
         );
 
         var it = nk.vertex.iterator(ctx, cmds);
         while (it.next()) |cmd| {
             if (cmd.elem_count == 0) continue;
 
-            c.glBindTexture(c.GL_TEXTURE_2D, @intCast(c.GLuint, cmd.texture.id));
+            c.glBindTexture(c.GL_TEXTURE_2D, @as(c.GLuint, @intCast(cmd.texture.id)));
             c.glScissor(
-                @floatToInt(c.GLint, cmd.clip_rect.x * fb_scale_x),
-                @floatToInt(c.GLint, @intToFloat(
+                @as(c.GLint, @intFromFloat(cmd.clip_rect.x * fb_scale_x)),
+                @as(c.GLint, @intFromFloat(@as(
                     f32,
-                    height - @floatToInt(c.GLint, cmd.clip_rect.y + cmd.clip_rect.h),
-                ) * fb_scale_y),
-                @floatToInt(c.GLint, cmd.clip_rect.w * fb_scale_x),
-                @floatToInt(c.GLint, cmd.clip_rect.h * fb_scale_y),
+                    @floatFromInt(height - @as(c.GLint, @intFromFloat(cmd.clip_rect.y + cmd.clip_rect.h))),
+                ) * fb_scale_y)),
+                @as(c.GLint, @intFromFloat(cmd.clip_rect.w * fb_scale_x)),
+                @as(c.GLint, @intFromFloat(cmd.clip_rect.h * fb_scale_y)),
             );
-            c.glDrawElements(c.GL_TRIANGLES, @intCast(c.GLsizei, cmd.elem_count), c.GL_UNSIGNED_SHORT, offset);
+            c.glDrawElements(c.GL_TRIANGLES, @as(c.GLsizei, @intCast(cmd.elem_count)), c.GL_UNSIGNED_SHORT, offset);
             offset += cmd.elem_count;
         }
         nk.clear(ctx);
@@ -286,8 +288,8 @@ fn uploadAtlas(data: [*]const u8, w: usize, h: usize) c.GLuint {
         c.GL_TEXTURE_2D,
         0,
         c.GL_RGBA,
-        @intCast(c_int, w),
-        @intCast(c_int, h),
+        @as(c_int, @intCast(w)),
+        @as(c_int, @intCast(h)),
         0,
         c.GL_RGBA,
         c.GL_UNSIGNED_BYTE,
@@ -299,16 +301,16 @@ fn uploadAtlas(data: [*]const u8, w: usize, h: usize) c.GLuint {
 
 fn scrollCallback(win: ?*c.GLFWwindow, xoffset: f64, yoffset: f64) callconv(.C) void {
     const usrptr = c.glfwGetWindowUserPointer(win);
-    const program = @ptrCast(*Program, @alignCast(@alignOf(Program), usrptr));
+    const program = @as(*Program, @ptrCast(@alignCast(usrptr)));
 
     var new_scroll = program.ctx.input.mouse.scroll_delta;
-    new_scroll.x += @floatCast(f32, xoffset);
-    new_scroll.y += @floatCast(f32, yoffset);
+    new_scroll.x += @as(f32, @floatCast(xoffset));
+    new_scroll.y += @as(f32, @floatCast(yoffset));
     nk.input.scroll(program.ctx, new_scroll);
 }
 
 fn charCallback(win: ?*c.GLFWwindow, codepoint: c_uint) callconv(.C) void {
     const usrptr = c.glfwGetWindowUserPointer(win);
-    const program = @ptrCast(*Program, @alignCast(@alignOf(Program), usrptr));
-    nk.input.unicode(program.ctx, @intCast(u21, codepoint));
+    const program = @as(*Program, @ptrCast(@alignCast(usrptr)));
+    nk.input.unicode(program.ctx, @as(u21, @intCast(codepoint)));
 }

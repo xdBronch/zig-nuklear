@@ -17,7 +17,7 @@ pub fn init(allocator: mem.Allocator, size: usize) Str {
 
 pub fn initFixed(bytes: []u8) Str {
     var res: Str = undefined;
-    c.nk_str_init_fixed(&res.c, @ptrCast(*anyopaque, bytes.ptr), bytes.len);
+    c.nk_str_init_fixed(&res.c, @as(*anyopaque, @ptrCast(bytes.ptr)), bytes.len);
     return res;
 }
 
@@ -31,7 +31,7 @@ pub fn free(str: *Str) void {
 
 pub fn appendStrChar(str: *Str, t: []const u8) usize {
     const res = c.nk_str_append_str_char(&str.c, nk.slice(t));
-    return @intCast(usize, res);
+    return @as(usize, @intCast(res));
 }
 
 pub fn appendStrRunes(str: *Str, runes: []const nk.Rune) c_int {
@@ -55,23 +55,23 @@ pub fn insertStrRunes(str: *Str, pos: c_int, a: [*c]const nk.Rune) c_int {
 }
 
 pub fn removeChars(str: *Str, n: usize) void {
-    return c.nk_str_remove_chars(&str.c, @intCast(c_int, n));
+    return c.nk_str_remove_chars(&str.c, @as(c_int, @intCast(n)));
 }
 
 pub fn removeRunes(str: *Str, n: usize) void {
-    return c.nk_str_remove_runes(&str.c, @intCast(c_int, n));
+    return c.nk_str_remove_runes(&str.c, @as(c_int, @intCast(n)));
 }
 
 pub fn deleteChars(str: *Str, pos: usize, n: usize) void {
-    return c.nk_str_delete_chars(&str.c, @intCast(c_int, pos), @intCast(c_int, n));
+    return c.nk_str_delete_chars(&str.c, @as(c_int, @intCast(pos)), @as(c_int, @intCast(n)));
 }
 
 pub fn deleteRunes(str: *Str, pos: usize, n: usize) void {
-    return c.nk_str_delete_runes(&str.c, @intCast(c_int, pos), @intCast(c_int, n));
+    return c.nk_str_delete_runes(&str.c, @as(c_int, @intCast(pos)), @as(c_int, @intCast(n)));
 }
 
 pub fn atChar(str: *Str, pos: usize) *u8 {
-    return c.nk_str_at_char(&str.c, @intCast(c_int, pos));
+    return c.nk_str_at_char(&str.c, @as(c_int, @intCast(pos)));
 }
 
 pub const RuneAtResult = struct {
@@ -82,8 +82,8 @@ pub const RuneAtResult = struct {
 pub fn atRune(str: *Str, pos: usize) RuneAtResult {
     var unicode: nk.Rune = undefined;
     var l: c_int = undefined;
-    const ptr = c.nk_str_at_rune(&str.c, @intCast(c_int, pos), &unicode, &l);
-    return .{ .unicode = unicode, .slice = ptr[0..@intCast(usize, l)] };
+    const ptr = c.nk_str_at_rune(&str.c, @as(c_int, @intCast(pos)), &unicode, &l);
+    return .{ .unicode = unicode, .slice = ptr[0..@as(usize, @intCast(l))] };
 }
 
 pub fn runeAt(str: Str, pos: c_int) nk.Rune {

@@ -45,16 +45,16 @@ export fn zigNuklearStrlen(str: [*:0]const u8) callconv(.C) c.nk_size {
 }
 
 export fn zigNuklearMemcopy(dst: [*]u8, src: [*]const u8, n: c.nk_size) callconv(.C) [*]u8 {
-    @memcpy(dst, src, n);
+    @memcpy(dst[0..n], src);
     return dst;
 }
 
 export fn zigNuklearMemset(dst: [*]u8, char: c_int, n: c.nk_size) callconv(.C) [*]u8 {
-    @memset(dst, @intCast(u8, char), n);
+    @memset(dst[0..n], @as(u8, @intCast(char)));
     return dst;
 }
 
-const Compare = fn (*const [16]u8, *const [16]u8) callconv(.C) c_int;
+const Compare = *const fn (*const [16]u8, *const [16]u8) callconv(.C) c_int;
 
 export fn zigNuklearSort(
     base: [*][16]u8,
@@ -64,7 +64,7 @@ export fn zigNuklearSort(
 ) callconv(.C) void {
     // This only ever sorts stbrp_rect types, which are documented to be 16 bytes.
     debug.assert(size == 16);
-    sort.sort([16]u8, base[0..nmemb], cmp, struct {
+    mem.sort([16]u8, base[0..nmemb], cmp, struct {
         fn compare(ctx: Compare, a: [16]u8, b: [16]u8) bool {
             return ctx(&a, &b) < 0;
         }

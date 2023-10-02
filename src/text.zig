@@ -25,11 +25,11 @@ pub const Align = enum(u8) {
 };
 
 pub fn label(ctx: *nk.Context, text: []const u8, alignment: Align) void {
-    return c.nk_label(ctx, nk.slice(text), @enumToInt(alignment));
+    return c.nk_label(ctx, nk.slice(text), @intFromEnum(alignment));
 }
 
 pub fn labelColored(ctx: *nk.Context, text: []const u8, alignment: Align, color: nk.Color) void {
-    return c.nk_label_colored(ctx, nk.slice(text), @enumToInt(alignment), color);
+    return c.nk_label_colored(ctx, nk.slice(text), @intFromEnum(alignment), color);
 }
 
 pub fn labelWrap(ctx: *nk.Context, text: []const u8) void {

@@ -36,7 +36,7 @@ pub const Colors = enum(u8) {
     tab_header = c.NK_COLOR_TAB_HEADER,
 
     fn toNuklear(color: Colors) c.enum_nk_style_colors {
-        return @intToEnum(c.enum_nk_style_colors, @enumToInt(color));
+        return @as(c.enum_nk_style_colors, @enumFromInt(@intFromEnum(color)));
     }
 };
 
@@ -64,7 +64,7 @@ pub fn getColorByName(color: Colors) [:0]const u8 {
 }
 
 pub fn getColorByNameZ(color: Colors) [*:0]const u8 {
-    return @ptrCast([*:0]const u8, c.nk_style_get_color_by_name(color.toNuklear()));
+    return @as([*:0]const u8, @ptrCast(c.nk_style_get_color_by_name(color.toNuklear())));
 }
 
 pub fn setFont(ctx: *nk.Context, font: *const nk.UserFont) void {

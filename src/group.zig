@@ -30,11 +30,11 @@ pub fn scrolledOffsetBegin(
     flags: nk.PanelFlags,
 ) bool {
     const id = nk.typeId(Id);
-    var c_x_offset: c.nk_uint = @intCast(c.nk_uint, offset.x);
-    var c_y_offset: c.nk_uint = @intCast(c.nk_uint, offset.y);
+    var c_x_offset: c.nk_uint = @as(c.nk_uint, @intCast(offset.x));
+    var c_y_offset: c.nk_uint = @as(c.nk_uint, @intCast(offset.y));
     defer {
-        offset.x = @intCast(usize, c_x_offset);
-        offset.y = @intCast(usize, c_y_offset);
+        offset.x = @as(usize, @intCast(c_x_offset));
+        offset.y = @as(usize, @intCast(c_y_offset));
     }
     return c.nk_group_scrolled_offset_begin(
         ctx,
@@ -92,8 +92,8 @@ pub fn setScrollByName(
     c.nk_group_set_scroll(
         ctx,
         nk.slice(name),
-        @intCast(c.nk_uint, offset.x),
-        @intCast(c.nk_uint, offset.y),
+        @as(c.nk_uint, @intCast(offset.x)),
+        @as(c.nk_uint, @intCast(offset.y)),
     );
 }
 

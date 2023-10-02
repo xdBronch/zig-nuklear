@@ -1,12 +1,11 @@
 const std = @import("std");
 
-const Builder = std.build.Builder;
+const Build = std.Build;
 const CrossTarget = std.build.CrossTarget;
-const LibExeObjStep = std.build.LibExeObjStep;
-const Pkg = std.build.Pkg;
+const Compile = Build.Step.Compile;
 
-pub fn build(b: *Builder) void {
-    const mode = b.standardReleaseOptions();
+pub fn build(b: *Build) void {
+    const optimize = b.standardOptimizeOption(.{});
     const target = b.standardTargetOptions(.{});
 
     const nk = Nuklear.init(b, .{
@@ -15,34 +14,40 @@ pub fn build(b: *Builder) void {
         .include_vertex_buffer_output = true,
         .zero_command_memory = true,
         .keystate_based_input = true,
+        .target = target,
+        .optimize = optimize,
     });
 
     const test_step = b.step("test", "Run library tests");
-    const tests = b.addTest("nuklear.zig");
+    const tests = b.addTest(.{
+        .name = "nuklear.zig",
+        .root_source_file = .{ .path = "examples/main.zig" },
+        .target = target,
+        .optimize = optimize,
+    });
     test_step.dependOn(&tests.step);
     nk.addTo(tests, .{});
 
-    const examples_step = b.step("examples", "");
-    const examples = b.addExecutable("examples", "examples/main.zig");
-    examples_step.dependOn(&examples.step);
+    const examples = b.addExecutable(.{
+        .name = "examples",
+        .root_source_file = .{ .path = "examples/main.zig" },
+        .target = target,
+        .optimize = optimize,
+    });
+    examples.strip = b.option(bool, "strip", "strip the example binary");
     nk.addTo(examples, .{});
 
-    examples.linkSystemLibrary("c");
+    examples.linkLibC();
     examples.linkSystemLibrary("GL");
     examples.linkSystemLibrary("glfw");
     examples.linkSystemLibrary("GLU");
-    examples.install();
-
-    for ([_]*LibExeObjStep{ tests, examples, nk.lib }) |obj| {
-        obj.setBuildMode(mode);
-        obj.setTarget(target);
-    }
+    b.installArtifact(examples);
 }
 
 const Nuklear = @This();
 
 options: Options,
-lib: *LibExeObjStep,
+lib: *Compile,
 
 pub const Options = struct {
     include_fixed_types: bool = false,
@@ -60,9 +65,11 @@ pub const Options = struct {
     buffer_default_initial_size: ?usize = null,
     max_number_buffer: ?usize = null,
     input_max: ?usize = null,
+    target: std.zig.CrossTarget,
+    optimize: std.builtin.OptimizeMode,
 
-    fn defineMacros(opts: Options, lib: *LibExeObjStep) void {
-        const b = lib.builder;
+    fn defineMacros(opts: Options, lib: *Compile) void {
+        const b = lib.step.owner;
         if (opts.include_fixed_types)
             lib.defineCMacro("NK_INCLUDE_FIXED_TYPES", null);
         if (opts.include_default_allocator)
@@ -96,9 +103,16 @@ pub const Options = struct {
     }
 };
 
-pub fn init(b: *Builder, opts: Options) Nuklear {
-    const lib = b.addStaticLibrary("zig-nuklear", null);
-    lib.addCSourceFile(dir() ++ "/src/c/nuklear.c", &.{});
+pub fn init(b: *Build, opts: Options) Nuklear {
+    const lib = b.addStaticLibrary(.{
+        .name = "zig-nuklear",
+        .target = opts.target,
+        .optimize = opts.optimize,
+    });
+    lib.addCSourceFile(.{
+        .file = .{ .path = b.pathJoin(&.{ dir(), "src/c/nuklear.c" }) },
+        .flags = &.{},
+    });
     opts.defineMacros(lib);
     return .{ .lib = lib, .options = opts };
 }
@@ -107,9 +121,9 @@ pub const AddToOptions = struct {
     package_name: []const u8 = "nuklear",
 };
 
-pub fn addTo(nk: Nuklear, lib: *LibExeObjStep, opt: AddToOptions) void {
-    lib.addIncludeDir(include_dir);
-    lib.addPackagePath(opt.package_name, pkg_path);
+pub fn addTo(nk: Nuklear, lib: *Compile, opt: AddToOptions) void {
+    lib.addIncludePath(.{ .path = include_dir });
+    lib.addAnonymousModule(opt.package_name, .{ .source_file = .{ .path = pkg_path } });
     lib.linkLibrary(nk.lib);
     nk.options.defineMacros(lib);
     lib.step.dependOn(&nk.lib.step);

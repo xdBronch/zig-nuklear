@@ -20,7 +20,7 @@ pub const Format = enum(u8) {
 
 pub fn init(allocator: *const mem.Allocator) nk.FontAtlas {
     var res: nk.FontAtlas = undefined;
-    c.nk_font_atlas_init(&res, &nk.allocator(allocator));
+    c.nk_font_atlas_init(&res, @constCast(&nk.allocator(allocator)));
     return res;
 }
 
@@ -62,7 +62,7 @@ pub fn addFromMemory(
     height: f32,
     config: ?*const Config,
 ) !*Font {
-    const ptr = @ptrCast(*const anyopaque, memory.ptr);
+    const ptr = @as(*const anyopaque, @ptrCast(memory.ptr));
     return c.nk_font_atlas_add_from_memory(atlas, ptr, memory.len, height, config) orelse
         return error.OutOfMemory;
 }
@@ -73,7 +73,7 @@ pub fn addCompressed(
     height: f32,
     config: ?*const Config,
 ) !*Font {
-    const ptr = @ptrCast(*const anyopaque, data.ptr);
+    const ptr = @as(*const anyopaque, @ptrCast(data.ptr));
     return c.nk_font_atlas_add_compressed(atlas, ptr, data.len, height, config) orelse
         return error.OutOfMemory;
 }
@@ -95,14 +95,14 @@ pub fn bake(atlas: *nk.FontAtlas, format: Format) !Baked {
         atlas,
         &w,
         &h,
-        @enumToInt(format),
+        @intFromEnum(format),
     ) orelse
         return error.OutOfMemory;
 
     return Baked{
-        .data = @ptrCast([*]const u8, data),
-        .w = @intCast(usize, w),
-        .h = @intCast(usize, h),
+        .data = @as([*]const u8, @ptrCast(data)),
+        .w = @as(usize, @intCast(w)),
+        .h = @as(usize, @intCast(h)),
     };
 }
 

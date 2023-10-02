@@ -16,7 +16,7 @@ pub fn color(ctx: *nk.Context, col: nk.Color) bool {
 }
 
 pub fn symbol(ctx: *nk.Context, sym: nk.SymbolType) bool {
-    return c.nk_button_symbol(ctx, @enumToInt(sym)) != 0;
+    return c.nk_button_symbol(ctx, @intFromEnum(sym)) != 0;
 }
 
 pub fn image(ctx: *nk.Context, img: nk.Image) bool {
@@ -31,9 +31,9 @@ pub fn symbolLabel(
 ) bool {
     return c.nk_button_symbol_label(
         ctx,
-        @enumToInt(sym),
+        @intFromEnum(sym),
         nk.slice(title),
-        @enumToInt(flags),
+        @intFromEnum(flags),
     ) != 0;
 }
 
@@ -46,7 +46,7 @@ pub fn labelStyled(ctx: *nk.Context, style: *const nk.StyleButton, title: []cons
 }
 
 pub fn symbolStyled(ctx: *nk.Context, sym: nk.SymbolType, style: nk.StyleButton) bool {
-    return c.nk_button_symbol_styled(ctx, &style, @enumToInt(sym)) != 0;
+    return c.nk_button_symbol_styled(ctx, &style, @intFromEnum(sym)) != 0;
 }
 
 pub fn imageStyled(ctx: *nk.Context, img: nk.Image, style: nk.StyleButton) bool {
@@ -63,9 +63,9 @@ pub fn symbolLabelStyled(
     return c.nk_button_symbol_label_styled(
         ctx,
         &style,
-        @enumToInt(sym),
+        @intFromEnum(sym),
         nk.slice(title),
-        @enumToInt(flags),
+        @intFromEnum(flags),
     ) != 0;
 }
 

@@ -29,8 +29,8 @@ pub fn getScroll(ctx: *nk.Context) nk.ScrollOffset {
 pub fn setScroll(ctx: *nk.Context, offset: nk.ScrollOffset) void {
     c.nk_popup_set_scroll(
         ctx,
-        @intCast(c.nk_uint, offset.x),
-        @intCast(c.nk_uint, offset.y),
+        @as(c.nk_uint, @intCast(offset.x)),
+        @as(c.nk_uint, @intCast(offset.y)),
     );
 }
 

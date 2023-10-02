@@ -55,16 +55,16 @@ pub fn motion(ctx: *nk.Context, x: c_int, y: c_int) void {
 }
 
 pub fn key(ctx: *nk.Context, keys: Keys, down: bool) void {
-    c.nk_input_key(ctx, @enumToInt(keys), @boolToInt(down));
+    c.nk_input_key(ctx, @intFromEnum(keys), @intFromBool(down));
 }
 
 pub fn button(ctx: *nk.Context, bot: Buttons, x: c_int, y: c_int, down: bool) void {
     c.nk_input_button(
         ctx,
-        @enumToInt(bot),
+        @intFromEnum(bot),
         x,
         y,
-        @boolToInt(down),
+        @intFromBool(down),
     );
 }
 
@@ -81,7 +81,7 @@ pub fn glyph(ctx: *nk.Context, gl: [4]u8) void {
 }
 
 pub fn unicode(ctx: *nk.Context, cp: u21) void {
-    c.nk_input_unicode(ctx, @intCast(c.nk_rune, cp));
+    c.nk_input_unicode(ctx, @as(c.nk_rune, @intCast(cp)));
 }
 
 pub fn end(ctx: *nk.Context) void {
@@ -97,7 +97,7 @@ pub fn hasMouseClickInRect(in: nk.Input, bots: nk.Buttons, r: nk.Rect) bool {
 }
 
 pub fn hasMouseClickDownInRect(in: nk.Input, bots: nk.Buttons, r: nk.Rect, down: bool) bool {
-    return c.nk_input_has_mouse_click_down_in_rect(&in, bots, r, @boolToInt(down)) != 0;
+    return c.nk_input_has_mouse_click_down_in_rect(&in, bots, r, @intFromBool(down)) != 0;
 }
 
 pub fn isMouseClickInRect(in: nk.Input, bots: nk.Buttons, r: nk.Rect) bool {
@@ -105,7 +105,7 @@ pub fn isMouseClickInRect(in: nk.Input, bots: nk.Buttons, r: nk.Rect) bool {
 }
 
 pub fn isMouseClickDownInRect(in: nk.Input, id: nk.Buttons, b: nk.Rect, down: bool) bool {
-    return c.nk_input_is_mouse_click_down_in_rect(&in, id, b, @boolToInt(down)) != 0;
+    return c.nk_input_is_mouse_click_down_in_rect(&in, id, b, @intFromBool(down)) != 0;
 }
 
 pub fn anyMouseClickInRect(in: nk.Input, r: nk.Rect) bool {

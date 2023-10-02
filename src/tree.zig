@@ -40,7 +40,7 @@ pub fn pushHashed(
         nk.slice(title),
         initial_state,
         nk.slice(hash),
-        @intCast(c_int, seed),
+        @as(c_int, @intCast(seed)),
     ) != 0;
 }
 
@@ -81,7 +81,7 @@ pub fn imagePushHashed(
         nk.slice(title),
         initial_state,
         nk.slice(hash),
-        @intCast(c_int, seed),
+        @as(c_int, @intCast(seed)),
     ) != 0;
 }
 
@@ -146,7 +146,7 @@ pub fn elementPushHashed(
         initial_state,
         &c_selected,
         nk.slice(hash),
-        @intCast(c_int, seed),
+        @as(c_int, @intCast(seed)),
     ) != 0;
 }
 
@@ -193,7 +193,7 @@ pub fn elementImagePushHashed(
         initial_state,
         &c_selected,
         nk.slice(hash),
-        @intCast(c_int, seed),
+        @as(c_int, @intCast(seed)),
     ) != 0;
 }
 
