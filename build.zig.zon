@@ -1,0 +1,12 @@
+.{
+    .name = "zig-nuklear",
+    .version = "0.1.0",
+    .paths = .{
+        "build.zig",
+        "LICENSE",
+        "nuklear.zig",
+        "README.md",
+        "src",
+        "examples",
+    },
+}

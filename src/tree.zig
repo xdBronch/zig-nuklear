@@ -206,7 +206,7 @@ test {
 }
 
 test "list" {
-    var ctx = &try nk.testing.init();
+    const ctx = &try nk.testing.init();
     defer nk.free(ctx);
 
     var selected: bool = false;

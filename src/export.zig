@@ -32,7 +32,7 @@ export fn zigNuklearFmod(x: f32, y: f32) callconv(.C) f32 {
 }
 
 export fn zigNuklearFabs(x: f32) callconv(.C) f32 {
-    return math.fabs(x);
+    return @abs(x);
 }
 
 export fn zigNuklearDtoa(out: [*]u8, n: f64) callconv(.C) [*]u8 {

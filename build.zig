@@ -1,21 +1,30 @@
 const std = @import("std");
 
 const Build = std.Build;
-const CrossTarget = std.build.CrossTarget;
-const Compile = Build.Step.Compile;
+const Module = Build.Module;
 
 pub fn build(b: *Build) void {
     const optimize = b.standardOptimizeOption(.{});
     const target = b.standardTargetOptions(.{});
 
-    const nk = Nuklear.init(b, .{
-        .include_default_font = true,
-        .include_font_backing = true,
-        .include_vertex_buffer_output = true,
-        .zero_command_memory = true,
-        .keystate_based_input = true,
+    var opts: Options = .{};
+    inline for (@typeInfo(Options).Struct.fields) |field| {
+        @field(opts, field.name) = switch (@typeInfo(field.type)) {
+            .Optional => b.option(@typeInfo(field.type).Optional.child, field.name, ""),
+            else => b.option(field.type, field.name, "") orelse
+                @as(*const field.type, @ptrCast(@alignCast(field.default_value))).*,
+        };
+    }
+
+    const mod = b.addModule("zig-nuklear", .{
+        .root_source_file = .{ .path = "nuklear.zig" },
         .target = target,
         .optimize = optimize,
+    });
+    mod.addIncludePath(.{ .path = "src/c" });
+    mod.addCSourceFile(.{
+        .file = .{ .path = "src/c/nuklear.c" },
+        .flags = &.{},
     });
 
     const test_step = b.step("test", "Run library tests");
@@ -26,28 +35,37 @@ pub fn build(b: *Build) void {
         .optimize = optimize,
     });
     test_step.dependOn(&tests.step);
-    nk.addTo(tests, .{});
+    tests.root_module.addImport("nuklear", mod);
 
-    const examples = b.addExecutable(.{
-        .name = "examples",
-        .root_source_file = .{ .path = "examples/main.zig" },
-        .target = target,
-        .optimize = optimize,
-    });
-    examples.strip = b.option(bool, "strip", "strip the example binary");
-    nk.addTo(examples, .{});
+    if (b.option(bool, "example", "build example") == true) {
+        opts = .{
+            .include_default_font = true,
+            .include_font_backing = true,
+            .include_vertex_buffer_output = true,
+            .zero_command_memory = true,
+            .keystate_based_input = true,
+        };
+        const examples = b.addExecutable(.{
+            .name = "examples",
+            .root_source_file = .{ .path = "examples/main.zig" },
+            .target = target,
+            .optimize = optimize,
+        });
+        examples.root_module.addImport("nuklear", mod);
+        examples.linkLibC();
+        examples.linkSystemLibrary("GL");
+        examples.linkSystemLibrary("glfw");
+        examples.linkSystemLibrary("GLU");
+        b.installArtifact(examples);
+    }
 
-    examples.linkLibC();
-    examples.linkSystemLibrary("GL");
-    examples.linkSystemLibrary("glfw");
-    examples.linkSystemLibrary("GLU");
-    b.installArtifact(examples);
+    opts.defineMacros(mod);
 }
 
 const Nuklear = @This();
 
 options: Options,
-lib: *Compile,
+mod: *Module,
 
 pub const Options = struct {
     include_fixed_types: bool = false,
@@ -65,74 +83,38 @@ pub const Options = struct {
     buffer_default_initial_size: ?usize = null,
     max_number_buffer: ?usize = null,
     input_max: ?usize = null,
-    target: std.zig.CrossTarget,
-    optimize: std.builtin.OptimizeMode,
 
-    fn defineMacros(opts: Options, lib: *Compile) void {
-        const b = lib.step.owner;
+    fn defineMacros(opts: Options, mod: *Module) void {
+        const b = mod.owner;
         if (opts.include_fixed_types)
-            lib.defineCMacro("NK_INCLUDE_FIXED_TYPES", null);
+            mod.addCMacro("NK_INCLUDE_FIXED_TYPES", "1");
         if (opts.include_default_allocator)
-            lib.defineCMacro("NK_INCLUDE_DEFAULT_ALLOCATOR", null);
+            mod.addCMacro("NK_INCLUDE_DEFAULT_ALLOCATOR", "1");
         if (opts.include_stdio)
-            lib.defineCMacro("NK_INCLUDE_STANDARD_IO", null);
+            mod.addCMacro("NK_INCLUDE_STANDARD_IO", "1");
         if (opts.include_std_varargs)
-            lib.defineCMacro("NK_INCLUDE_STANDARD_VARARGS", null);
+            mod.addCMacro("NK_INCLUDE_STANDARD_VARARGS", "1");
         if (opts.include_vertex_buffer_output)
-            lib.defineCMacro("NK_INCLUDE_VERTEX_BUFFER_OUTPUT", null);
+            mod.addCMacro("NK_INCLUDE_VERTEX_BUFFER_OUTPUT", "1");
         if (opts.include_font_backing)
-            lib.defineCMacro("NK_INCLUDE_FONT_BAKING", null);
+            mod.addCMacro("NK_INCLUDE_FONT_BAKING", "1");
         if (opts.include_default_font)
-            lib.defineCMacro("NK_INCLUDE_DEFAULT_FONT", null);
+            mod.addCMacro("NK_INCLUDE_DEFAULT_FONT", "1");
         if (opts.include_command_userdata)
-            lib.defineCMacro("NK_INCLUDE_COMMAND_USERDATA", null);
+            mod.addCMacro("NK_INCLUDE_COMMAND_USERDATA", "1");
         if (opts.button_trigger_on_release)
-            lib.defineCMacro("NK_BUTTON_TRIGGER_ON_RELEASE", null);
+            mod.addCMacro("NK_BUTTON_TRIGGER_ON_RELEASE", "1");
         if (opts.zero_command_memory)
-            lib.defineCMacro("NK_ZERO_COMMAND_MEMORY", null);
+            mod.addCMacro("NK_ZERO_COMMAND_MEMORY", "1");
         if (opts.uint_draw_index)
-            lib.defineCMacro("NK_UINT_DRAW_INDEX", null);
+            mod.addCMacro("NK_UINT_DRAW_INDEX", "1");
         if (opts.keystate_based_input)
-            lib.defineCMacro("NK_KEYSTATE_BASED_INPUT", null);
+            mod.addCMacro("NK_KEYSTATE_BASED_INPUT", "1");
         if (opts.buffer_default_initial_size) |size|
-            lib.defineCMacro("NK_BUFFER_DEFAULT_INITIAL_SIZE", b.fmt("{}", .{size}));
+            mod.addCMacro("NK_BUFFER_DEFAULT_INITIAL_SIZE", b.fmt("{}", .{size}));
         if (opts.max_number_buffer) |number|
-            lib.defineCMacro("NK_MAX_NUMBER_BUFFER", b.fmt("{}", .{number}));
+            mod.addCMacro("NK_MAX_NUMBER_BUFFER", b.fmt("{}", .{number}));
         if (opts.input_max) |number|
-            lib.defineCMacro("NK_INPUT_MAX", b.fmt("{}", .{number}));
+            mod.addCMacro("NK_INPUT_MAX", b.fmt("{}", .{number}));
     }
 };
-
-pub fn init(b: *Build, opts: Options) Nuklear {
-    const lib = b.addStaticLibrary(.{
-        .name = "zig-nuklear",
-        .target = opts.target,
-        .optimize = opts.optimize,
-    });
-    lib.addCSourceFile(.{
-        .file = .{ .path = b.pathJoin(&.{ dir(), "src/c/nuklear.c" }) },
-        .flags = &.{},
-    });
-    opts.defineMacros(lib);
-    return .{ .lib = lib, .options = opts };
-}
-
-pub const AddToOptions = struct {
-    package_name: []const u8 = "nuklear",
-};
-
-pub fn addTo(nk: Nuklear, lib: *Compile, opt: AddToOptions) void {
-    lib.addIncludePath(.{ .path = include_dir });
-    lib.addAnonymousModule(opt.package_name, .{ .source_file = .{ .path = pkg_path } });
-    lib.linkLibrary(nk.lib);
-    nk.options.defineMacros(lib);
-    lib.step.dependOn(&nk.lib.step);
-}
-
-pub const pkg_path = dir() ++ "/nuklear.zig";
-
-pub const include_dir = dir() ++ "/src/c";
-
-fn dir() []const u8 {
-    return std.fs.path.dirname(@src().file) orelse ".";
-}

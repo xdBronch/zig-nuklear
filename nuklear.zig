@@ -623,7 +623,7 @@ test {
 test "initFixed" {
     var font: UserFont = undefined;
     var buf: [1024]u8 = undefined;
-    var ctx = &initFixed(&buf, &font);
+    const ctx = &initFixed(&buf, &font);
     defer free(ctx);
 }
 

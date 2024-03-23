@@ -153,7 +153,7 @@ test {
 }
 
 test "input" {
-    var ctx = &try nk.testing.init();
+    const ctx = &try nk.testing.init();
     defer nk.free(ctx);
 
     input.begin(ctx);

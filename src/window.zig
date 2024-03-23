@@ -55,7 +55,7 @@ test {
 }
 
 test "window" {
-    var ctx = &try nk.testing.init();
+    const ctx = &try nk.testing.init();
     defer nk.free(ctx);
 
     const id = nk.id(opaque {});

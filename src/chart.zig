@@ -88,7 +88,7 @@ test {
 }
 
 test "chart" {
-    var ctx = &try nk.testing.init();
+    const ctx = &try nk.testing.init();
     defer nk.free(ctx);
 
     if (nk.window.begin(ctx, &nk.id(opaque {}), nk.rect(10, 10, 10, 10), .{})) |_| {
